@@ -1,0 +1,77 @@
+<html>
+<head>
+<title>main.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #808080;}
+.s3 { color: #6a8759;}
+.s4 { color: #6897bb;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+main.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">cv2</span>
+<span class="s0">import </span><span class="s1">pickle</span>
+<span class="s0">import </span><span class="s1">cvzone</span>
+<span class="s0">import </span><span class="s1">numpy </span><span class="s0">as </span><span class="s1">np</span>
+
+<span class="s2"># Video feed</span>
+<span class="s1">cap = cv2.VideoCapture(</span><span class="s3">'carPark.mp4'</span><span class="s1">)</span>
+
+<span class="s0">with </span><span class="s1">open(</span><span class="s3">'CarParkPos'</span><span class="s0">, </span><span class="s3">'rb'</span><span class="s1">) </span><span class="s0">as </span><span class="s1">f:</span>
+    <span class="s1">posList = pickle.load(f)</span>
+
+<span class="s1">width</span><span class="s0">, </span><span class="s1">height = </span><span class="s4">107</span><span class="s0">, </span><span class="s4">48</span>
+
+
+<span class="s0">def </span><span class="s1">checkParkingSpace(imgPro):</span>
+    <span class="s1">spaceCounter = </span><span class="s4">0</span>
+
+    <span class="s0">for </span><span class="s1">pos </span><span class="s0">in </span><span class="s1">posList:</span>
+        <span class="s1">x</span><span class="s0">, </span><span class="s1">y = pos</span>
+
+        <span class="s1">imgCrop = imgPro[y:y + height</span><span class="s0">, </span><span class="s1">x:x + width]</span>
+        <span class="s2"># cv2.imshow(str(x * y), imgCrop)</span>
+        <span class="s1">count = cv2.countNonZero(imgCrop)</span>
+
+
+        <span class="s0">if </span><span class="s1">count &lt; </span><span class="s4">900</span><span class="s1">:</span>
+            <span class="s1">color = (</span><span class="s4">0</span><span class="s0">, </span><span class="s4">255</span><span class="s0">, </span><span class="s4">0</span><span class="s1">)</span>
+            <span class="s1">thickness = </span><span class="s4">5</span>
+            <span class="s1">spaceCounter += </span><span class="s4">1</span>
+        <span class="s0">else</span><span class="s1">:</span>
+            <span class="s1">color = (</span><span class="s4">0</span><span class="s0">, </span><span class="s4">0</span><span class="s0">, </span><span class="s4">255</span><span class="s1">)</span>
+            <span class="s1">thickness = </span><span class="s4">2</span>
+
+        <span class="s1">cv2.rectangle(img</span><span class="s0">, </span><span class="s1">pos</span><span class="s0">, </span><span class="s1">(pos[</span><span class="s4">0</span><span class="s1">] + width</span><span class="s0">, </span><span class="s1">pos[</span><span class="s4">1</span><span class="s1">] + height)</span><span class="s0">, </span><span class="s1">color</span><span class="s0">, </span><span class="s1">thickness)</span>
+        <span class="s1">cvzone.putTextRect(img</span><span class="s0">, </span><span class="s1">str(count)</span><span class="s0">, </span><span class="s1">(x</span><span class="s0">, </span><span class="s1">y + height - </span><span class="s4">3</span><span class="s1">)</span><span class="s0">, </span><span class="s1">scale=</span><span class="s4">1</span><span class="s0">,</span>
+                           <span class="s1">thickness=</span><span class="s4">2</span><span class="s0">, </span><span class="s1">offset=</span><span class="s4">0</span><span class="s0">, </span><span class="s1">colorR=color)</span>
+
+    <span class="s1">cvzone.putTextRect(img</span><span class="s0">, </span><span class="s3">f'Free: </span><span class="s0">{</span><span class="s1">spaceCounter</span><span class="s0">}</span><span class="s3">/</span><span class="s0">{</span><span class="s1">len(posList)</span><span class="s0">}</span><span class="s3">'</span><span class="s0">, </span><span class="s1">(</span><span class="s4">100</span><span class="s0">, </span><span class="s4">50</span><span class="s1">)</span><span class="s0">, </span><span class="s1">scale=</span><span class="s4">3</span><span class="s0">,</span>
+                           <span class="s1">thickness=</span><span class="s4">5</span><span class="s0">, </span><span class="s1">offset=</span><span class="s4">20</span><span class="s0">, </span><span class="s1">colorR=(</span><span class="s4">0</span><span class="s0">,</span><span class="s4">200</span><span class="s0">,</span><span class="s4">0</span><span class="s1">))</span>
+<span class="s0">while True</span><span class="s1">:</span>
+
+    <span class="s0">if </span><span class="s1">cap.get(cv2.CAP_PROP_POS_FRAMES) == cap.get(cv2.CAP_PROP_FRAME_COUNT):</span>
+        <span class="s1">cap.set(cv2.CAP_PROP_POS_FRAMES</span><span class="s0">, </span><span class="s4">0</span><span class="s1">)</span>
+    <span class="s1">success</span><span class="s0">, </span><span class="s1">img = cap.read()</span>
+    <span class="s1">imgGray = cv2.cvtColor(img</span><span class="s0">, </span><span class="s1">cv2.COLOR_BGR2GRAY)</span>
+    <span class="s1">imgBlur = cv2.GaussianBlur(imgGray</span><span class="s0">, </span><span class="s1">(</span><span class="s4">3</span><span class="s0">, </span><span class="s4">3</span><span class="s1">)</span><span class="s0">, </span><span class="s4">1</span><span class="s1">)</span>
+    <span class="s1">imgThreshold = cv2.adaptiveThreshold(imgBlur</span><span class="s0">, </span><span class="s4">255</span><span class="s0">, </span><span class="s1">cv2.ADAPTIVE_THRESH_GAUSSIAN_C</span><span class="s0">,</span>
+                                         <span class="s1">cv2.THRESH_BINARY_INV</span><span class="s0">, </span><span class="s4">25</span><span class="s0">, </span><span class="s4">16</span><span class="s1">)</span>
+    <span class="s1">imgMedian = cv2.medianBlur(imgThreshold</span><span class="s0">, </span><span class="s4">5</span><span class="s1">)</span>
+    <span class="s1">kernel = np.ones((</span><span class="s4">3</span><span class="s0">, </span><span class="s4">3</span><span class="s1">)</span><span class="s0">, </span><span class="s1">np.uint8)</span>
+    <span class="s1">imgDilate = cv2.dilate(imgMedian</span><span class="s0">, </span><span class="s1">kernel</span><span class="s0">, </span><span class="s1">iterations=</span><span class="s4">1</span><span class="s1">)</span>
+
+    <span class="s1">checkParkingSpace(imgDilate)</span>
+    <span class="s1">cv2.imshow(</span><span class="s3">&quot;Image&quot;</span><span class="s0">, </span><span class="s1">img)</span>
+    <span class="s2"># cv2.imshow(&quot;ImageBlur&quot;, imgBlur)</span>
+    <span class="s2"># cv2.imshow(&quot;ImageThres&quot;, imgMedian)</span>
+    <span class="s1">cv2.waitKey(</span><span class="s4">10</span><span class="s1">)</span></pre>
+</body>
+</html>
